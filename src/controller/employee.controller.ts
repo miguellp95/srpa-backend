@@ -1,4 +1,5 @@
 import {Request, Response } from 'express'; 
+import jwt from 'jsonwebtoken';
 import Employee from "../models/employee";
 import {hashPassword, comparePassword} from '../lib/helper';
 
@@ -88,8 +89,8 @@ export async function newEmployee(req : Request, res : Response){
     email = typeof(email) == "string" && email.trim().length > 0 ? email : false;
     address = typeof(address) == "string" && address.trim().length > 0 ? address : false;
     charge = typeof(charge) == "string" && charge.trim().length > 0 ? charge : false; 
-    password = typeof(password) == "string" && password.trim().length > 0 ? password : false;
-
+    password = typeof(password) == "string" && password.trim().length > 0 ? password : false; 
+    
     if(identification && first_name && last_name && date_born && phone_number && email && address && charge && password){
 
         //Finding duplicates with identification
@@ -161,7 +162,7 @@ export async function updateEmployee(req : Request, res : Response){
                 statusCode = 200;
                 result = "Datos actualizados."
             } catch (error) {
-                statusCode = 500;
+                statusCode = 500; 
                 result = "Error del servidor al actualizar datos del funcionario."
             }
 
@@ -199,4 +200,33 @@ export async function deleteEmployee(req : Request, res: Response){
     }
     
     return res.status(statusCode).json(result);
+}
+
+
+export async function signin(req : Request , res : Response){
+ 
+    let statusCode , result ;
+
+    const { email, password } = req.body; 
+    const user = await Employee.findOne({ email });
+ 
+    if( user ){
+        
+        if(await comparePassword(password, user.password)){
+            statusCode = 200;
+            result = { token : jwt.sign({ _id : user._id}, 'srpa')};
+             
+
+        } else {
+            statusCode = 401;
+            result = "Contraseña incorrecta¡-"
+        }
+
+    } else {
+        statusCode = 400;
+        result = "El correo electrónico no es válido o no existe."
+    }
+
+    res.status(statusCode).json(result);
+
 }

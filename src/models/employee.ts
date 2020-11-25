@@ -3,7 +3,6 @@ import { model, Schema, Document} from 'mongoose'
 
 //Schema Employee
 const schema = new Schema({
-    id_employee : { type : String },
     identification : { type : String , minlength:8, maxlength:10 },
     first_name : { type : String },
     last_name : { type : String },
@@ -17,7 +16,6 @@ const schema = new Schema({
 });
 
 interface IEmployee extends Document{
-    id_employee : string,
     identification : string,
     first_name : string,
     last_name : string,

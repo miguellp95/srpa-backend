@@ -4,7 +4,7 @@ import path from 'path';
 import fs from 'fs-extra'
 
 //Models
-import srpa_user_model from '../models/srpa-user';
+import srpa_user_model from '../models/srpa-user'; 
 
 export async function index(req: Request, res : Response){
     //Search for srpa users on DB
@@ -12,57 +12,39 @@ export async function index(req: Request, res : Response){
     return res.status(200).json(SRPA_users);
 }
 
-export async function create_srpa_user(req : Request, res : Response){
+export async function create_srpa_user(req: Request, res: Response) {
+    let statusCode, result;
 
     //Obtaining data retrieved from DB
-    let { 
-        first_name, 
-        last_name, 
-        identification, 
-        date_born, 
-        address} = req.body;
-    
-    const photo  = req.file;
-    
-    first_name = typeof(first_name) == 'string' && first_name.trim().length > 0 ? first_name.trim() : false;
-    last_name = typeof(last_name) == 'string' && last_name.trim().length > 0 ? last_name.trim() : false;
-    identification = typeof(identification) == 'string' && identification.trim().length == 10 ? identification.trim() : false;
-    date_born = typeof(date_born) == 'string' && date_born.trim().length > 0 ? date_born.trim() : false;
-    address = typeof(address) == 'string' && address.trim().length > 0 ? address.trim() : false;
 
-    let statusCode, result ;
+    const photo = req.file;
 
-    if(first_name && last_name && identification && date_born && address){
-        
-        //Find if already exists
-        const srpa_users = await srpa_user_model.find({identification});
+    //Find if already exists
+    const srpa_users = await srpa_user_model.find({
+        identification: req.body.identification,
+    });
 
-        if(srpa_users.length > 0){
-        
-            statusCode = 400;
-            result = "El usuario SRPA ya se encuentra registrado";
-        
-        } else {
-            
-            const srpa_users_object = { first_name, last_name, identification, date_born, address , photo_path : req.file.path};
-            
-            const new_srpa_user = new srpa_user_model(srpa_users_object);
-
-            try {
-                await new_srpa_user.save();
-                statusCode = 200;
-                result = "srpa user saved"
-            } catch (error) {
-                statusCode = 400;
-                result = error;
-            }
-        }
-    } else {
+    if (srpa_users.length > 0) {
         statusCode = 400;
-        result = "Debe llenar los campos obligatorios";
+        result = "El usuario SRPA ya se encuentra registrado";
+    } else {
+        const srpa_users_object = req.body;
+        console.log(req.body)
+        srpa_users_object.photo_path = req.file.path;
+
+        const new_srpa_user = new srpa_user_model(srpa_users_object);
+
+        try {
+            await new_srpa_user.save();
+            statusCode = 200;
+            result = "srpa user saved";
+        } catch (error) {
+            statusCode = 400;
+            result = error;
+        }
     }
-    
-    if(statusCode == 400) await fs.unlink(path.resolve(req.file.path));
+
+    if (statusCode == 400) await fs.unlink(path.resolve(req.file.path));
 
     res.status(statusCode).json(result);
 }
