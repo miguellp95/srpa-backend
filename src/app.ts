@@ -3,8 +3,9 @@ import express, { Application } from 'express';
 import morgan from 'morgan';
 import path from 'path';  
 
-import srpa_user from './routes/srpa-user'
-import employee from './routes/employee';
+import srpa_user from './routes/srpa-user.route'
+import employee from './routes/employee.route';
+import user from './routes/user.route';
 
 const app: Application = express();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 
 
 //Routes
+app.use('/api/srpa', user);
 app.use('/api/srpa', srpa_user);
 app.use('/api/srpa/', employee);
 

@@ -24,8 +24,7 @@ interface IEmployee extends Document{
     email : string,
     address : string,
     charge : string,
-    state : boolean, 
-    password :string
+    state : boolean
 }
 
 //Creating and exporting the model

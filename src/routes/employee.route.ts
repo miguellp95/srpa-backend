@@ -4,7 +4,13 @@ const router = Router();
  
 
 // Controllers Imports
-import { index, getOneEmployee, newEmployee, updateEmployee, deleteEmployee , signin}  from '../controller/employee.controller';
+import { 
+    index,
+    getOneEmployee,
+    newEmployee,
+    updateEmployee,
+    deleteEmployee }  from '../controller/employee.controller';
+
 import { verifyToken } from '../lib/jwt';
 
 
@@ -18,8 +24,5 @@ router.route('/employee/:id')
     .delete( deleteEmployee )
     .put( updateEmployee )
     .get( verifyToken, getOneEmployee );
-
-router.route('/signin')
-    .post( signin );
 
 export default router;

@@ -1,22 +1,7 @@
-import {Request, Response } from 'express'; 
-import jwt from 'jsonwebtoken';
-import Employee from "../models/employee";
-import {hashPassword, comparePassword} from '../lib/helper';
+import {Request, Response } from 'express';  
+import Employee from "../models/employee"; 
 
-interface IEmployee{
-    id_employee? : string,
-    identification : string,
-    first_name : string,
-    last_name : string,
-    date_born : string,
-    phone_number : string,
-    email : string,
-    address : string,
-    charge : string,
-    state? : boolean,
-    username : string,
-    password :string
-}
+import { IEmployee } from '../interfaces/employee.interface';
 
 
 
@@ -77,8 +62,7 @@ export async function newEmployee(req : Request, res : Response){
         phone_number,
         email,
         address,
-        charge,  
-        password
+        charge 
         } = req.body;
 
     identification = typeof(identification) == "string" && identification.trim().length >= 8 && identification.trim().length <= 10 ? identification : false;
@@ -89,9 +73,8 @@ export async function newEmployee(req : Request, res : Response){
     email = typeof(email) == "string" && email.trim().length > 0 ? email : false;
     address = typeof(address) == "string" && address.trim().length > 0 ? address : false;
     charge = typeof(charge) == "string" && charge.trim().length > 0 ? charge : false; 
-    password = typeof(password) == "string" && password.trim().length > 0 ? password : false; 
     
-    if(identification && first_name && last_name && date_born && phone_number && email && address && charge && password){
+    if(identification && first_name && last_name && date_born && phone_number && email && address && charge){
 
         //Finding duplicates with identification
         const employees = await Employee.find({identification});
@@ -100,9 +83,6 @@ export async function newEmployee(req : Request, res : Response){
             statusCode = 500;
             result = "El número de identiticación ya existe";
         } else {
-
-            //Encrpyting password
-            req.body.password = await hashPassword(req.body.password);
 
             const employeeObj = new Employee(req.body);
 
@@ -143,8 +123,7 @@ export async function updateEmployee(req : Request, res : Response){
                 phone_number,
                 email,
                 address,
-                charge,  
-                password
+                charge 
                 } = req.body;
             
             if(identification) employee.identification = identification;
@@ -155,7 +134,6 @@ export async function updateEmployee(req : Request, res : Response){
             if(email) employee.email = email;
             if(address) employee.address = address;
             if(charge) employee.charge = charge;
-            if(password) employee.password = await hashPassword(password);
 
             try {
                 await employee.save();
@@ -203,30 +181,3 @@ export async function deleteEmployee(req : Request, res: Response){
 }
 
 
-export async function signin(req : Request , res : Response){
- 
-    let statusCode , result ;
-
-    const { email, password } = req.body; 
-    const user = await Employee.findOne({ email });
- 
-    if( user ){
-        
-        if(await comparePassword(password, user.password)){
-            statusCode = 200;
-            result = { token : jwt.sign({ _id : user._id}, 'srpa')};
-             
-
-        } else {
-            statusCode = 401;
-            result = "Contraseña incorrecta¡-"
-        }
-
-    } else {
-        statusCode = 400;
-        result = "El correo electrónico no es válido o no existe."
-    }
-
-    res.status(statusCode).json(result);
-
-}

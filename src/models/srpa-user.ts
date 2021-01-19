@@ -16,7 +16,7 @@ const schema = new Schema({
     parent_1 : { type : String , default : 'No aplica'},
     parent_2 : { type : String , default : 'No aplica'},
     health : { type : String , default : 'Normal'},
-    attention_mode : { type : String },
+    attention_mode : { type : String , default : "No aplica"},
     photo_path : { type : String }
 });
 

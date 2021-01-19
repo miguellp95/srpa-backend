@@ -17,11 +17,16 @@ export function verifyToken( req : Request | any, res : Response, next : NextFun
             result = "Acceso no autorizado";
             res.status(statusCode).json(result);
         } else {
-            const payload  : any = jwt.verify(token , 'srpa');
-            req.userId = payload._id;
+            try {
+                const payload:any = jwt.verify(token ,<string> process.env.SECRETKEY);
+                req.userLogged = payload;
+                next();
+
+            } catch (error) {
+                res.status(403).json("El token ha expirado"); 
+            }
         }
         
-        next();
         
     }
 }
